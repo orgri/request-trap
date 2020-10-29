@@ -1,0 +1,28 @@
+{
+  "name": "request-trap",
+  "version": "1.0.0",
+  "description": "back-end task #2",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orgri/request-trap.git"
+  },
+  "author": "Reva Vladyslav",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/orgri/request-trap/issues"
+  },
+  "homepage": "https://github.com/orgri/request-trap#readme",
+  "dependencies": {
+    "bootstrap": "^4.5.3",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.12.1"
+  }
+}
