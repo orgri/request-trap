@@ -1,35 +1,54 @@
 const express = require('express');
 const router = express.Router();
+const Requests = require('../models/requests');
+
+const LIMIT_DEFAULT = 10;
 
 router.all('/:id', async (req, res) => {
+  const request = new Requests({
+    id: req.params.id,
+    ip: req.ip,
+    method: req.method,
+    query: req.query,
+    params: req.params,
+    body: req.body,
+    cookies: req.cookies,
+    headers: req.headers
+  });
+
   try {
-    res.redirect('/');
+    await request.save();
     res.status(201).send();
-  } catch (e) {
-    res.status(500).send();
+  } catch (error) {
+    res.status(500).send(error);
   }
 });
 
 router.get('/:id/requests', async (req, res) => {
+  const id = req.params.id;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.perPage) || LIMIT_DEFAULT;
+  const skip = limit * (page - 1);
+  const content = {
+    header: 'Requests:',
+    list: `There are no requests for "${id}"`
+  };
+
   try {
-    const content = {};
+    const reqList = await Requests
+      .find({ id: id })
+      .sort({ createdAt: 'desc' })  
+      .select('-_id -__v')
+      .skip(skip)
+      .limit(limit);
 
-    content.date = new Date().toLocaleString();
-    content.ip = req.ip;
-    content.method = req.method;
-    content.scheme = {};
-    content.query = req.query;
-    content.params = req.path;
-    content.body = req.body;
-    content.cookies = req.cookies;
-    content.headers = req.headers;
+    if (reqList.length) {
+      content.list = JSON.stringify(reqList, null, 2);
+    }
 
-    res.render('requests', {
-      header: 'Requests:',
-      content: JSON.stringify(content, null, 2)
-    });
-  } catch (e) {
-    res.status(500).send();
+    res.render('requests', content);
+  } catch (error) {
+    res.status(500).send(error);
   }
 });
 
