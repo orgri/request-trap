@@ -4,6 +4,7 @@
   "description": "back-end task #2",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "local": "node -r dotenv/config app.js dotenv_config_path=./config/local.env"
   },
   "repository": {
