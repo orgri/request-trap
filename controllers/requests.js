@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Requests = require('../models/requests');
+const io = require('../helpers/socket').socketConnection.io;
 
 const LIMIT_DEFAULT = 10;
 
@@ -18,6 +19,7 @@ router.all('/:id', async (req, res) => {
 
   try {
     await request.save();
+    io.sockets.to(request.id).emit('messages', request);
     res.status(201).send();
   } catch (error) {
     res.status(500).send(error);
@@ -30,19 +32,20 @@ router.get('/:id/requests', async (req, res) => {
   const limit = parseInt(req.query.perPage) || LIMIT_DEFAULT;
   const skip = limit * (page - 1);
   const content = {
-    header: 'Requests:',
+    header: 'Requests :',
     list: `There are no requests for "${id}"`
   };
 
   try {
     const reqList = await Requests
       .find({ id: id })
-      .sort({ createdAt: 'desc' })  
+      .sort({ createdAt: 'desc' })
       .select('-_id -__v')
       .skip(skip)
       .limit(limit);
 
     if (reqList.length) {
+      content.header = `Requests to "${id}":`;
       content.list = JSON.stringify(reqList, null, 2);
     }
 
