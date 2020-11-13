@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const Requests = require('../models/requests');
-const io = require('../helpers/socket').socketConnection.io;
+const { socketConnection : { io } } = require('../helpers/socket');
 
-const LIMIT_DEFAULT = 10;
+const LIMIT_DEFAULT = 25;
 
-router.all('/:id', async (req, res) => {
+router.all('/:id', async (req, res, next) => {
   const request = new Requests({
     id: req.params.id,
     ip: req.ip,
     method: req.method,
+    scheme: req.protocol,
     query: req.query,
     params: req.params,
     body: req.body,
@@ -19,39 +20,31 @@ router.all('/:id', async (req, res) => {
 
   try {
     await request.save();
-    io.sockets.to(request.id).emit('messages', request);
+    io.sockets.to(request.id).emit('newData', request);
     res.status(201).send();
   } catch (error) {
-    res.status(500).send(error);
+    next(error);
   }
 });
 
-router.get('/:id/requests', async (req, res) => {
-  const id = req.params.id;
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.perPage) || LIMIT_DEFAULT;
+router.get('/:id/requests', async ({
+  params: { id },
+  query: { page, limit }
+}, res, next) => {
+  page = parseInt(page, 10) || 1;
+  limit = parseInt(limit, 10) || LIMIT_DEFAULT;
   const skip = limit * (page - 1);
-  const content = {
-    header: 'Requests :',
-    list: `There are no requests for "${id}"`
-  };
 
   try {
-    const reqList = await Requests
-      .find({ id: id })
+    const data = await Requests
+      .find({ id })
       .sort({ createdAt: 'desc' })
-      .select('-_id -__v')
       .skip(skip)
       .limit(limit);
 
-    if (reqList.length) {
-      content.header = `Requests to "${id}":`;
-      content.list = JSON.stringify(reqList, null, 2);
-    }
-
-    res.render('requests', content);
+    res.render('requests', { data, id });
   } catch (error) {
-    res.status(500).send(error);
+    next(error);
   }
 });
 

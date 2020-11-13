@@ -4,33 +4,18 @@ const requestSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
-  method: {
-    type: String
-  },
-  scheme: {
-    type: Object
-  },
-  query: {
-    type: Object
-  },
-  params: {
-    type: Object
-  },
-  body: {
-    type: Object
-  },
-  cookies: {
-    type: Object
-  },
-  headers: {
-    type: Object
-  }
+  method: String,
+  ip: String,
+  scheme: String,
+  query: Object,
+  params: Object,
+  body: Object,
+  cookies: Object,
+  headers: Object,
 }, {
   timestamps: true
 });
 
-const Requests = mongoose.model('Requests', requestSchema);
-
-module.exports = Requests;
+module.exports = mongoose.model('Requests', requestSchema);

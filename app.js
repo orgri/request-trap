@@ -1,9 +1,10 @@
 const express = require('express');
 const path = require('path');
-const controllers = require('./controllers');
 const http = require('http');
-const io = require('./helpers/socket').socketConnection.io;
-require('./models');
+const controllers = require('./controllers');
+const { socketConnection : { io } } = require('./helpers/socket');
+const { errorHandler } = require('./helpers/exceptions');
+require('./db/mongodb');
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -15,11 +16,10 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', controllers);
+app.use(errorHandler);
 
-io.attach(server);
+io.attach(server, { pingTimeout: 60000 }); // pingTimeout: 6000 - to fix websockets connection closed error
 
-server.listen(port, () => {
-  console.log(`Server is up on port ${port}!`);
-});
+server.listen(port);
 
 module.exports = app;
