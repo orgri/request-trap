@@ -21,7 +21,7 @@ router.all('/:id', async (req, res, next) => {
   try {
     await request.save();
     io.sockets.to(request.id).emit('newData', request);
-    res.status(201).send();
+    res.status(201).send(request);
   } catch (error) {
     next(error);
   }

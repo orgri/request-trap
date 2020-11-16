@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "local": "nodemon -r dotenv/config app.js dotenv_config_path=./config/local.env"
+    "local": "nodemon -r dotenv/config app.js dotenv_config_path=./config/local.env",
+    "test": "mocha tests/**/*spec.js --exit"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,9 @@
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
-    "eslint": "^7.12.1"
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "eslint": "^7.12.1",
+    "mocha": "^8.2.1"
   }
 }
