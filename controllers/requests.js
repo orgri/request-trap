@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Requests = require('../models/requests');
-const { socketConnection : { io } } = require('../helpers/socket');
+const { socketConnection: { io } } = require('../helpers/socket');
 
 const LIMIT_DEFAULT = 25;
 
@@ -18,13 +18,12 @@ router.all('/:id', async (req, res, next) => {
     headers: req.headers
   });
 
-  try {
-    await request.save();
-    io.sockets.to(request.id).emit('newData', request);
-    res.status(201).send(request);
-  } catch (error) {
-    next(error);
-  }
+  request.save()
+    .then((data) => {
+      io.sockets.to(request.id).emit('newData', data);
+      res.status(201).send(data);
+    })
+    .catch(next);
 });
 
 router.get('/:id/requests', async ({
@@ -35,17 +34,15 @@ router.get('/:id/requests', async ({
   limit = parseInt(limit, 10) || LIMIT_DEFAULT;
   const skip = limit * (page - 1);
 
-  try {
-    const data = await Requests
-      .find({ id })
-      .sort({ createdAt: 'desc' })
-      .skip(skip)
-      .limit(limit);
-
-    res.render('requests', { data, id });
-  } catch (error) {
-    next(error);
-  }
+  Requests
+    .find({ id })
+    .sort({ createdAt: 'desc' })
+    .skip(skip)
+    .limit(limit)
+    .then((data) => {
+      res.render('requests', { data, id });
+    })
+    .catch(next);
 });
 
 module.exports = router;

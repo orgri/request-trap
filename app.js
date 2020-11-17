@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const http = require('http');
+const compression = require('compression');
+const helmet = require('helmet');
 const controllers = require('./controllers');
 const { socketConnection : { io } } = require('./helpers/socket');
 const { errorHandler } = require('./helpers/exceptions');
@@ -17,6 +19,8 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', controllers);
 app.use(errorHandler);
+app.use(compression());
+app.use(helmet());
 
 io.attach(server, { pingTimeout: 60000 }); // pingTimeout: 6000 - to fix websockets connection closed error
 
